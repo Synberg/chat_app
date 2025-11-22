@@ -1,14 +1,12 @@
 package org.synberg.pet.chat.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.synberg.pet.chat.dto.UserDto;
 import org.synberg.pet.chat.dto.create.UserCreateDto;
 import org.synberg.pet.chat.dto.update.UserUpdateDto;
-import org.synberg.pet.chat.entity.User;
 import org.synberg.pet.chat.service.UserService;
 
 import java.util.List;

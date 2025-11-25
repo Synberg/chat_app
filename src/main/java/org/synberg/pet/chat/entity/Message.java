@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 @Table(name="messages")
 @Entity
 @Getter
@@ -33,8 +32,4 @@ public class Message {
     private LocalDateTime createdAt;
 
     private LocalDateTime editedAt;
-
-    public boolean getEdited() {
-        return edited;
-    }
 }

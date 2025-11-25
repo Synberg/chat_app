@@ -13,7 +13,6 @@ import org.synberg.pet.chat.repository.MessageRepository;
 import org.synberg.pet.chat.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.Calendar;
 import java.util.List;
 
 @Service
@@ -69,7 +68,7 @@ public class MessageService {
                               message.getText(),
                               message.getUser().getId(),
                               message.getChat().getId(),
-                              message.getEdited(),
+                              message.isEdited(),
                               message.getCreatedAt(),
                               message.getEditedAt()
         );

@@ -7,13 +7,12 @@ import org.springframework.web.bind.annotation.*;
 import org.synberg.pet.chat.dto.MessageDto;
 import org.synberg.pet.chat.dto.create.MessageCreateDto;
 import org.synberg.pet.chat.dto.update.MessageUpdateDto;
-import org.synberg.pet.chat.repository.MessageRepository;
 import org.synberg.pet.chat.service.MessageService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/messages")
+@RequestMapping("/api/messages")
 @RequiredArgsConstructor
 public class MessageController {
     private final MessageService messageService;

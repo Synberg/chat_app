@@ -6,6 +6,8 @@ import org.synberg.pet.chat.dto.ChatDto;
 import org.synberg.pet.chat.dto.create.ChatCreateDto;
 import org.synberg.pet.chat.entity.Chat;
 import org.synberg.pet.chat.entity.User;
+import org.synberg.pet.chat.exception.AlreadyExistsException;
+import org.synberg.pet.chat.exception.NotFoundException;
 import org.synberg.pet.chat.repository.ChatRepository;
 import org.synberg.pet.chat.repository.UserRepository;
 
@@ -20,7 +22,7 @@ public class ChatService {
     public ChatDto find(Long id) {
         return chatRepository.findById(id)
                 .map(this::mapToChatDto)
-                .orElseThrow(() -> new RuntimeException("Chat not found"));
+                .orElseThrow(() -> new NotFoundException("Chat not found"));
     }
 
     public List<ChatDto> findAll() {
@@ -32,11 +34,11 @@ public class ChatService {
 
     public ChatDto create(ChatCreateDto chatCreateDto) {
         User user1 = userRepository.findById(chatCreateDto.user1Id())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
         User user2  = userRepository.findById(chatCreateDto.user2Id())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
         if (chatRepository.chatExists(user1, user2)) {
-            throw new RuntimeException("Chat already exists");
+            throw new AlreadyExistsException("Chat already exists");
         }
         Chat chat = new Chat();
         chat.setUser1(user1);
@@ -47,7 +49,7 @@ public class ChatService {
 
     public void delete(Long id) {
         Chat chat = chatRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Chat not found"));
+                .orElseThrow(() -> new NotFoundException("Chat not found"));
         chatRepository.delete(chat);
     }
 

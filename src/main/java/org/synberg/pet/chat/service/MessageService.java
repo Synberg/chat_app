@@ -8,6 +8,7 @@ import org.synberg.pet.chat.dto.update.MessageUpdateDto;
 import org.synberg.pet.chat.entity.Chat;
 import org.synberg.pet.chat.entity.Message;
 import org.synberg.pet.chat.entity.User;
+import org.synberg.pet.chat.exception.NotFoundException;
 import org.synberg.pet.chat.repository.ChatRepository;
 import org.synberg.pet.chat.repository.MessageRepository;
 import org.synberg.pet.chat.repository.UserRepository;
@@ -24,7 +25,7 @@ public class MessageService {
 
     public MessageDto find(Long id) {
         Message message = messageRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Message not found"));
+                .orElseThrow(() -> new NotFoundException("Message not found"));
         return toMessageDto(message);
     }
 
@@ -34,9 +35,9 @@ public class MessageService {
 
     public MessageDto create(MessageCreateDto messageDto) {
         User user = userRepository.findById(messageDto.userId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
         Chat chat = chatRepository.findById(messageDto.chatId())
-                .orElseThrow(() -> new RuntimeException("Chat not found"));
+                .orElseThrow(() -> new NotFoundException("Chat not found"));
         Message message = new Message();
         message.setText(messageDto.text());
         message.setUser(user);
@@ -49,7 +50,7 @@ public class MessageService {
 
     public MessageDto update(Long id, MessageUpdateDto messageDto) {
         Message message = messageRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Message not found"));
+                .orElseThrow(() -> new NotFoundException("Message not found"));
         message.setText(messageDto.text());
         message.setEdited(true);
         message.setEditedAt(LocalDateTime.now());
@@ -59,7 +60,7 @@ public class MessageService {
 
     public void delete(Long id) {
         Message message = messageRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Message not found"));
+                .orElseThrow(() -> new NotFoundException("Message not found"));
         messageRepository.delete(message);
     }
 

@@ -6,8 +6,11 @@ import org.synberg.pet.chat.dto.UserDto;
 import org.synberg.pet.chat.dto.create.UserCreateDto;
 import org.synberg.pet.chat.dto.update.UserUpdateDto;
 import org.synberg.pet.chat.entity.User;
+import org.synberg.pet.chat.exception.AlreadyExistsException;
+import org.synberg.pet.chat.exception.NotFoundException;
 import org.synberg.pet.chat.repository.UserRepository;
 
+import java.rmi.AlreadyBoundException;
 import java.util.List;
 
 @Service
@@ -18,7 +21,7 @@ public class UserService {
     public UserDto find(Long id) {
         return userRepository.findById(id)
                 .map(this::mapToDto)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     public List<UserDto> findAll() {
@@ -30,7 +33,7 @@ public class UserService {
 
     public UserDto create(UserCreateDto userDto) {
         if (userRepository.existsByUsername(userDto.username())) {
-            throw new RuntimeException("Username is already in use");
+            throw new AlreadyExistsException("Username is already exists");
         }
         User user = new User();
         user.setUsername(userDto.username());
@@ -40,7 +43,7 @@ public class UserService {
     }
 
     public UserDto update(Long id, UserUpdateDto userDto) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
         user.setUsername(userDto.username());
         user.setDisplayName(userDto.displayName());
         User updatedUser = userRepository.save(user);
@@ -49,7 +52,7 @@ public class UserService {
 
     public void delete(Long id) {
        User user = userRepository.findById(id)
-               .orElseThrow(() -> new RuntimeException("User not found"));
+               .orElseThrow(() -> new NotFoundException("User not found"));
        userRepository.delete(user);
     }
 

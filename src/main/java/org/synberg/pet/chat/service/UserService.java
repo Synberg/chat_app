@@ -44,6 +44,9 @@ public class UserService {
 
     public UserDto update(Long id, UserUpdateDto userDto) {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        if (userRepository.existsByUsername(userDto.username())) {
+            throw new AlreadyExistsException("Username already exists");
+        }
         user.setUsername(userDto.username());
         user.setDisplayName(userDto.displayName());
         User updatedUser = userRepository.save(user);

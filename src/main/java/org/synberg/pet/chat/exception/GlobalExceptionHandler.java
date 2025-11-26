@@ -1,5 +1,6 @@
 package org.synberg.pet.chat.exception;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,7 +26,7 @@ public class GlobalExceptionHandler {
             NotFoundException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("message", ex.getMessage());
-        return ResponseEntity.status(404).body(error);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
     @ExceptionHandler(AlreadyExistsException.class)
@@ -33,6 +34,6 @@ public class GlobalExceptionHandler {
             AlreadyExistsException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("message", ex.getMessage());
-        return ResponseEntity.status(400).body(error);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 }

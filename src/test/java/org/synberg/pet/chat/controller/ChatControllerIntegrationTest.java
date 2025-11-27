@@ -39,7 +39,7 @@ public class ChatControllerIntegrationTest {
 
     private void deleteUser(int id) throws Exception {
         mockMvc.perform(delete("/api/users/" + id))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -99,18 +99,18 @@ public class ChatControllerIntegrationTest {
                 )
                 .andExpect(status().isConflict());
 
-        // 8. DELETE chat (200 ok)
+        // 8. DELETE chat (204 no content)
         mockMvc.perform(delete("/api/chats/" + chatId))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         // 9. DELETE non-existing chat (404 not found)
         mockMvc.perform(delete("/api/chats/999999"))
                 .andExpect(status().isNotFound());
 
-        // 10. DELETE user1 (200 ok)
+        // 10. DELETE user1 (204 no content)
         deleteUser(id1);
 
-        // 11. DELETE user2 (200 ok)
+        // 11. DELETE user2 (204 no content)
         deleteUser(id2);
     }
 }

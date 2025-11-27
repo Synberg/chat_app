@@ -108,13 +108,13 @@ public class UserControllerIntegrationTest {
                 )
                 .andExpect(status().isNotFound());
 
-        // 9. DELETE user1 (200 ok)
+        // 9. DELETE user1 (204 no content)
         mockMvc.perform(delete("/api/users/" + id1))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
-        // 10. DELETE user2 (200 ok)
+        // 10. DELETE user2 (204 no content)
         mockMvc.perform(delete("/api/users/" + id2))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         // 11. DELETE non-existing user (404 not found)
         mockMvc.perform(delete("/api/users/999999"))

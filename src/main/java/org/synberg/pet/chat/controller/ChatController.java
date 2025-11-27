@@ -33,6 +33,7 @@ public class ChatController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteChat(@PathVariable Long id) {
         chatService.delete(id);
     }

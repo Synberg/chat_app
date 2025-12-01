@@ -44,23 +44,23 @@ public class ChatControllerIntegrationTest {
 
     @Test
     void fullCrudScenario() throws Exception {
-        // 1. CREATE user1 (201 created)
-        int id1 = createUser("vasya", "Vasya");
+        // CREATE user1 (201 created)
+        int user1Id = createUser("vasya", "Vasya");
 
-        // 2. CREATE user2 (201 created)
-        int id2 = createUser("sasha", "Sasha");
+        // CREATE user2 (201 created)
+        int user2Id = createUser("sasha", "Sasha");
 
-        // 3. GET non-existing chat (404 not found)
+        // GET non-existing chat (404 not found)
         mockMvc.perform(get("/api/chats/999999"))
                 .andExpect(status().isNotFound());
 
-        // 4. CREATE chat (201 created)
+        // CREATE chat (201 created)
         String chatJSON = """
                 {
                     "user1Id": %d,
                     "user2Id": %d
                 }
-                """.formatted(id1, id2);
+                """.formatted(user1Id, user2Id);
         MvcResult chatRes = mockMvc.perform(
                 post("/api/chats")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -72,11 +72,11 @@ public class ChatControllerIntegrationTest {
 
         int chatId = JsonPath.parse(chatRes.getResponse().getContentAsString()).read("$.id", Integer.class);
 
-        // 5. GET  chat (200 ok)
+        // GET  chat (200 ok)
         mockMvc.perform(get("/api/chats/" + chatId))
                 .andExpect(status().isOk());
 
-        // 6. Create existing chat (user1, user2) (409 conflict)
+        // Create existing chat (user1, user2) (409 conflict)
         mockMvc.perform(
                         post("/api/chats")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -84,13 +84,13 @@ public class ChatControllerIntegrationTest {
                 )
                 .andExpect(status().isConflict());
 
-        // 7. Create existing chat (user2, user1) (409 conflict)
+        // Create existing chat (user2, user1) (409 conflict)
         String chatJSON2 = """
                 {
                     "user1Id": %d,
                     "user2Id": %d
                 }
-                """.formatted(id2, id1);
+                """.formatted(user2Id, user1Id);
 
         mockMvc.perform(
                         post("/api/chats")
@@ -99,18 +99,18 @@ public class ChatControllerIntegrationTest {
                 )
                 .andExpect(status().isConflict());
 
-        // 8. DELETE chat (204 no content)
+        // DELETE chat (204 no content)
         mockMvc.perform(delete("/api/chats/" + chatId))
                 .andExpect(status().isNoContent());
 
-        // 9. DELETE non-existing chat (404 not found)
-        mockMvc.perform(delete("/api/chats/999999"))
+        // DELETE non-existing chat (404 not found)
+        mockMvc.perform(delete("/api/chats/" + chatId))
                 .andExpect(status().isNotFound());
 
-        // 10. DELETE user1 (204 no content)
-        deleteUser(id1);
+        // DELETE user1 (204 no content)
+        deleteUser(user1Id);
 
-        // 11. DELETE user2 (204 no content)
-        deleteUser(id2);
+        // DELETE user2 (204 no content)
+        deleteUser(user2Id);
     }
 }

@@ -22,11 +22,11 @@ public class UserControllerIntegrationTest {
     @Test
     void fullCrudScenario() throws Exception {
 
-        // 1. GET non-existing (404 not found)
+        // GET non-existing user (404 not found)
         mockMvc.perform(get("/api/users/999999"))
                 .andExpect(status().isNotFound());
 
-        // 2. CREATE user1 (201 created)
+        // CREATE user1 (201 created)
         String user1 = """
                 {
                     "username": "vasya123",
@@ -42,13 +42,13 @@ public class UserControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        int id1 = JsonPath.parse(res1.getResponse().getContentAsString()).read("$.id", Integer.class);
+        int user1Id = JsonPath.parse(res1.getResponse().getContentAsString()).read("$.id", Integer.class);
 
-        // 3. GET user1 (200 ok)
-        mockMvc.perform(get("/api/users/" + id1))
+        // GET user1 (200 ok)
+        mockMvc.perform(get("/api/users/" + user1Id))
                 .andExpect(status().isOk());
 
-        // 4. CREATE user2 (201 created)
+        // CREATE user2 (201 created)
         String user2 = """
                 {
                     "username": "vasya456",
@@ -64,13 +64,13 @@ public class UserControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        int id2 = JsonPath.parse(res2.getResponse().getContentAsString()).read("$.id", Integer.class);
+        int user2Id = JsonPath.parse(res2.getResponse().getContentAsString()).read("$.id", Integer.class);
 
-        // 5. GET user2 (200 ok)
-        mockMvc.perform(get("/api/users/" + id2))
+        // GET user2 (200 ok)
+        mockMvc.perform(get("/api/users/" + user2Id))
                 .andExpect(status().isOk());
 
-        // 6. UPDATE user2: username vasya456 -> vasya123 (409 conflict)
+        // UPDATE user2: username vasya456 -> vasya123 (409 conflict)
         String conflict = """
                 {
                     "username": "vasya123",
@@ -79,13 +79,13 @@ public class UserControllerIntegrationTest {
                 """;
 
         mockMvc.perform(
-                        put("/api/users/" + id2)
+                        put("/api/users/" + user2Id)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(conflict)
                 )
                 .andExpect(status().isConflict());
 
-        // 7. UPDATE user2: username vasya456 -> vasya789, displayName Vasya2 -> Not Vasya (200 ok)
+        // UPDATE user2: username vasya456 -> vasya789, displayName Vasya2 -> Not Vasya (200 ok)
         String update = """
                 {
                     "username": "vasya789",
@@ -94,13 +94,13 @@ public class UserControllerIntegrationTest {
                 """;
 
         mockMvc.perform(
-                        put("/api/users/" + id2)
+                        put("/api/users/" + user2Id)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(update)
                 )
                 .andExpect(status().isOk());
 
-        // 8. UPDATE non-existing user (404 not found)
+        // UPDATE non-existing user (404 not found)
         mockMvc.perform(
                         put("/api/users/999999")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -108,16 +108,16 @@ public class UserControllerIntegrationTest {
                 )
                 .andExpect(status().isNotFound());
 
-        // 9. DELETE user1 (204 no content)
-        mockMvc.perform(delete("/api/users/" + id1))
+        // DELETE user1 (204 no content)
+        mockMvc.perform(delete("/api/users/" + user1Id))
                 .andExpect(status().isNoContent());
 
-        // 10. DELETE user2 (204 no content)
-        mockMvc.perform(delete("/api/users/" + id2))
+        // DELETE user2 (204 no content)
+        mockMvc.perform(delete("/api/users/" + user2Id))
                 .andExpect(status().isNoContent());
 
-        // 11. DELETE non-existing user (404 not found)
-        mockMvc.perform(delete("/api/users/999999"))
+        // DELETE non-existing user (404 not found)
+        mockMvc.perform(delete("/api/users/" + user2Id))
                 .andExpect(status().isNotFound());
     }
 }

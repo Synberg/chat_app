@@ -65,13 +65,15 @@ public class MessageService {
     }
 
     private MessageDto toMessageDto(Message message) {
-        return new MessageDto(message.getId(),
-                              message.getText(),
-                              message.getUser().getId(),
-                              message.getChat().getId(),
-                              message.isEdited(),
-                              message.getCreatedAt(),
-                              message.getEditedAt()
+        return new MessageDto(
+                message.getId(),
+                message.getText(),
+                message.getUser().getId(),
+                message.getUser().getDisplayName(),
+                message.getChat().getId(),
+                message.isEdited(),
+                message.getCreatedAt(),
+                message.getEditedAt()
         );
     }
 }

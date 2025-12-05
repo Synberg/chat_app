@@ -1,3 +1,3 @@
 package org.synberg.pet.chat.dto.create;
 
-public record ChatCreateDto(Long user1Id, Long user2Id) {}
+public record ChatCreateDto(String username1, String username2) {}

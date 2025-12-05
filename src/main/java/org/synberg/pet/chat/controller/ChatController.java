@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.synberg.pet.chat.dto.ChatDto;
+import org.synberg.pet.chat.dto.MessageDto;
 import org.synberg.pet.chat.dto.create.ChatCreateDto;
 import org.synberg.pet.chat.service.ChatService;
 
@@ -17,13 +18,18 @@ public class ChatController {
     private final ChatService chatService;
 
     @GetMapping("/{id}")
-    public ChatDto getUserById(@PathVariable Long id) {
+    public ChatDto getChatById(@PathVariable Long id) {
         return chatService.find(id);
     }
 
     @GetMapping
     public List<ChatDto> getChats() {
         return chatService.findAll();
+    }
+
+    @GetMapping("/{id}/messages")
+    public List<MessageDto> getMessages(@PathVariable Long id) {
+        return chatService.findAllMessages(id);
     }
 
     @PostMapping

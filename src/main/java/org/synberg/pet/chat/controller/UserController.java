@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.synberg.pet.chat.dto.ChatDto;
 import org.synberg.pet.chat.dto.UserDto;
 import org.synberg.pet.chat.dto.create.UserCreateDto;
 import org.synberg.pet.chat.dto.update.UserUpdateDto;
@@ -25,6 +26,11 @@ public class UserController {
     @GetMapping
     public List<UserDto> getUsers() {
         return userService.findAll();
+    }
+
+    @GetMapping("/{id}/chats")
+    public List<ChatDto> getUserChats(@PathVariable Long id) {
+        return userService.findAllChats(id);
     }
 
     @PostMapping

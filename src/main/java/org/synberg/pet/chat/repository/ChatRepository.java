@@ -6,6 +6,8 @@ import org.springframework.data.repository.query.Param;
 import org.synberg.pet.chat.entity.Chat;
 import org.synberg.pet.chat.entity.User;
 
+import java.util.List;
+
 public interface ChatRepository extends JpaRepository<Chat, Long> {
     @Query("""
             SELECT COUNT(c) > 0
@@ -14,4 +16,5 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
             OR (c.user1 = :u2 AND c.user2 = :u1)
             """)
     boolean chatExists(@Param("u1") User u1, @Param("u2") User u2);
+    List<Chat> findByUser1OrUser2(User user1, User user2);
 }

@@ -3,12 +3,15 @@ package org.synberg.pet.chat.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.synberg.pet.chat.dto.ChatDto;
+import org.synberg.pet.chat.dto.MessageDto;
 import org.synberg.pet.chat.dto.create.ChatCreateDto;
 import org.synberg.pet.chat.entity.Chat;
+import org.synberg.pet.chat.entity.Message;
 import org.synberg.pet.chat.entity.User;
 import org.synberg.pet.chat.exception.AlreadyExistsException;
 import org.synberg.pet.chat.exception.NotFoundException;
 import org.synberg.pet.chat.repository.ChatRepository;
+import org.synberg.pet.chat.repository.MessageRepository;
 import org.synberg.pet.chat.repository.UserRepository;
 
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.List;
 public class ChatService {
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
+    private final MessageRepository messageRepository;
 
     public ChatDto find(Long id) {
         return chatRepository.findById(id)
@@ -32,10 +36,17 @@ public class ChatService {
                 .toList();
     }
 
+    public List<MessageDto> findAllMessages(Long id) {
+        Chat chat = chatRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Chat not found"));
+        List<Message> messages = messageRepository.findByChat(chat);
+        return messages.stream().map(this::toMessageDto).toList();
+    }
+
     public ChatDto create(ChatCreateDto chatCreateDto) {
-        User user1 = userRepository.findById(chatCreateDto.user1Id())
+        User user1 = userRepository.findByUsername(chatCreateDto.username1())
                 .orElseThrow(() -> new NotFoundException("User not found"));
-        User user2  = userRepository.findById(chatCreateDto.user2Id())
+        User user2  = userRepository.findByUsername(chatCreateDto.username2())
                 .orElseThrow(() -> new NotFoundException("User not found"));
         if (chatRepository.chatExists(user1, user2)) {
             throw new AlreadyExistsException("Chat already exists");
@@ -54,6 +65,25 @@ public class ChatService {
     }
 
     public ChatDto mapToChatDto(Chat chat) {
-        return new ChatDto(chat.getId(), chat.getUser1().getId(),  chat.getUser2().getId());
+        return new ChatDto(
+                chat.getId(),
+                chat.getUser1().getId(),
+                chat.getUser1().getUsername(),
+                chat.getUser2().getId(),
+                chat.getUser2().getUsername()
+        );
+    }
+
+    private MessageDto toMessageDto(Message message) {
+        return new MessageDto(
+                message.getId(),
+                message.getText(),
+                message.getUser().getId(),
+                message.getUser().getDisplayName(),
+                message.getChat().getId(),
+                message.isEdited(),
+                message.getCreatedAt(),
+                message.getEditedAt()
+        );
     }
 }

@@ -1,6 +1,7 @@
 package org.synberg.pet.chat.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.synberg.pet.chat.dto.MessageDto;
 import org.synberg.pet.chat.dto.create.MessageCreateDto;
@@ -22,6 +23,8 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final ChatRepository chatRepository;
+
+    private final SimpMessagingTemplate messagingTemplate;
 
     public MessageDto find(Long id) {
         Message message = messageRepository.findById(id)
@@ -45,7 +48,14 @@ public class MessageService {
         message.setEdited(false);
         message.setCreatedAt(LocalDateTime.now());
         Message saved = messageRepository.save(message);
-        return toMessageDto(saved);
+        MessageDto msgDto = toMessageDto(saved);
+
+        messagingTemplate.convertAndSend(
+                "/topic/chat." + chat.getUser1().getId(), msgDto);
+        messagingTemplate.convertAndSend(
+                "/topic/chat." + chat.getUser2().getId(), msgDto);
+
+        return msgDto;
     }
 
     public MessageDto update(Long id, MessageUpdateDto messageDto) {

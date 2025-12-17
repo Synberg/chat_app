@@ -42,7 +42,7 @@ public class ChatService {
     public List<MessageDto> findAllMessages(Long id) {
         Chat chat = chatRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Chat not found"));
-        List<Message> messages = messageRepository.findByChat(chat);
+        List<Message> messages = messageRepository.findByChatOrderByCreatedAt(chat);
         return messages.stream().map(this::toMessageDto).toList();
     }
 

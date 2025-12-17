@@ -8,5 +8,5 @@ import org.synberg.pet.chat.entity.User;
 import java.util.List;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    List<Message> findByChat(Chat chat);
+    List<Message> findByChatOrderByCreatedAt(Chat chat);
 }

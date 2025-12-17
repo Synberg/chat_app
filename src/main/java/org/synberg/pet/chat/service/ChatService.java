@@ -58,20 +58,24 @@ public class ChatService {
         chat.setUser1(user1);
         chat.setUser2(user2);
         Chat created = chatRepository.save(chat);
-
         ChatDto chatDto = mapToChatDto(created);
-        messagingTemplate.convertAndSend(
-                "/topic/newChat." + user1.getId(), chatDto);
-        messagingTemplate.convertAndSend(
-                "/topic/newChat." + user2.getId(), chatDto);
 
-        return mapToChatDto(created);
+        messagingTemplate.convertAndSend("/topic/newChat." + user1.getId(), "update");
+        messagingTemplate.convertAndSend("/topic/newChat." + user2.getId(), "update");
+
+        return chatDto;
     }
 
     public void delete(Long id) {
         Chat chat = chatRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Chat not found"));
         chatRepository.delete(chat);
+
+        Long user1Id = chat.getUser1().getId();
+        Long user2Id = chat.getUser2().getId();
+
+        messagingTemplate.convertAndSend("/topic/newChat." + user1Id, "update");
+        messagingTemplate.convertAndSend("/topic/newChat." + user2Id, "update");
     }
 
     public ChatDto mapToChatDto(Chat chat) {

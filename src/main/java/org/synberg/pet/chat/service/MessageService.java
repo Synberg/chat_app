@@ -16,6 +16,7 @@ import org.synberg.pet.chat.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -65,13 +66,24 @@ public class MessageService {
         message.setEdited(true);
         message.setEditedAt(LocalDateTime.now());
         Message saved = messageRepository.save(message);
-        return toMessageDto(saved);
+        MessageDto msgDto = toMessageDto(saved);
+
+        messagingTemplate.convertAndSend("/topic/chat." + message.getChat().getUser1().getId(), msgDto);
+        messagingTemplate.convertAndSend("/topic/chat." + message.getChat().getUser2().getId(), msgDto);
+
+        return msgDto;
     }
 
     public void delete(Long id) {
         Message message = messageRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Message not found"));
+        Chat chat = message.getChat();
         messageRepository.delete(message);
+
+        messagingTemplate.convertAndSend("/topic/chat." + chat.getUser1().getId(),
+                Map.of("deletedId", id));
+        messagingTemplate.convertAndSend("/topic/chat." + chat.getUser2().getId(),
+                Map.of("deletedId", id));
     }
 
     private MessageDto toMessageDto(Message message) {

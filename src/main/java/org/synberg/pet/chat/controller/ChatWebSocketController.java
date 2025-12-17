@@ -6,7 +6,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.synberg.pet.chat.dto.create.MessageCreateDto;
 import org.synberg.pet.chat.service.MessageService;
-import org.synberg.pet.chat.service.ChatService;
 
 @Controller
 @RequiredArgsConstructor

@@ -9,7 +9,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: run
-FROM eclipse-temurin:23-jdk
+FROM openjdk:23-ea-18-jdk-slim
 WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar

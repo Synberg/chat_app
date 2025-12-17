@@ -30,16 +30,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ---------------- REST ----------------
 async function login(username, displayName) {
-    const res = await fetch(`${API_BASE}/users`, {
+    let res = await fetch(`${API_BASE}/users`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ username, displayName })
     });
-    currentUser = await res.json();
+
+    if (res.status === 201) {
+        currentUser = await res.json();
+
+    } else if (res.status === 409) {
+        const userRes = await fetch(`${API_BASE}/users/by-username/${username}`);
+        if (!userRes.ok) {
+            alert("Failed to load existing user");
+            return;
+        }
+        currentUser = await userRes.json();
+
+    } else {
+        alert("Login failed: " + res.status);
+        return;
+    }
 
     document.getElementById("login-block").style.display = "none";
     document.getElementById("logoutBtn").style.display = "block";
-    document.querySelectorAll(".hidden-when-logged-out").forEach(el => el.style.display = "block");
+    document.querySelectorAll(".hidden-when-logged-out")
+        .forEach(el => el.style.display = "block");
 
     connectWebSocket();
     await loadChats();
@@ -52,11 +68,15 @@ async function loadChats() {
     const list = document.getElementById("chatsList");
     list.innerHTML = "";
 
-    chats.forEach(c => {
-        const other = c.user1Id === currentUser.id ? c.user2Username : c.user1Username;
+    for (const c of chats) {
+        if (document.querySelector(`#chat-${c.id}`)) return;
+
+        const otherUsername = c.user1Id === currentUser.id ? c.user2Username : c.user1Username;
+        const otherDisplayName = await getDisplayName(otherUsername);
 
         const li = document.createElement("li");
-        li.textContent = `Chat #${c.id} with ${other}`;
+        li.id = `chat-${c.id}`;
+        li.textContent = `Chat #${c.id} with ${otherDisplayName}`;
 
         // кнопка удаления
         const delBtn = document.createElement("button");
@@ -70,7 +90,7 @@ async function loadChats() {
         li.appendChild(delBtn);
         li.onclick = () => openChat(c.id);
         list.appendChild(li);
-    });
+    }
 }
 
 async function createChat(otherUsername) {
@@ -84,12 +104,14 @@ async function createChat(otherUsername) {
 
 async function openChat(chatId) {
     currentChat = chatId;
+
+    subscribeToChat(chatId);
+
     const res = await fetch(`${API_BASE}/chats/${chatId}/messages`);
     const messages = await res.json();
     renderMessages(messages);
 
     document.getElementById("chat-title").textContent = `Chat #${chatId}`;
-    subscribeToChat(chatId);
 }
 
 async function deleteChat(chatId) {
@@ -118,27 +140,65 @@ async function deleteChat(chatId) {
 
 async function sendMessage(text) {
     if (!currentChat) return;
+
     await fetch(`${API_BASE}/messages`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ text, userId: currentUser.id, chatId: currentChat })
     });
+
+    const res = await fetch(`${API_BASE}/chats/${currentChat}/messages`);
+    const messages = await res.json();
+    renderMessages(messages);
+
     document.getElementById("messageText").value = "";
 }
 
 async function editMessage(messageId, oldText) {
     const newText = prompt("Edit message:", oldText);
     if (!newText || newText === oldText) return;
-    await fetch(`${API_BASE}/messages/${messageId}`, {
+
+    const res = await fetch(`${API_BASE}/messages/${messageId}`, {
         method: "PUT",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ text: newText })
     });
+
+    if (!res.ok) return;
+
+    const messagesDiv = document.getElementById("messages");
+    const wrapper = Array.from(messagesDiv.children)
+        .find(w => w.querySelector(".msg-btn.edit").onclick.toString().includes(messageId));
+
+    if (wrapper) {
+        wrapper.querySelector(".msg-text").textContent = newText;
+        let edited = wrapper.querySelector(".edited");
+        if (!edited) {
+            const span = document.createElement("span");
+            span.className = "edited";
+            span.textContent = "(edited)";
+            wrapper.querySelector(".msg-header").appendChild(span);
+        }
+    }
 }
 
 async function deleteMessage(messageId) {
     if (!confirm("Delete this message?")) return;
-    await fetch(`${API_BASE}/messages/${messageId}`, { method: "DELETE" });
+
+    const res = await fetch(`${API_BASE}/messages/${messageId}`, { method: "DELETE" });
+    if (!res.ok) return;
+
+    const messagesDiv = document.getElementById("messages");
+    const wrapper = Array.from(messagesDiv.children)
+        .find(w => w.querySelector(".msg-btn.delete").onclick.toString().includes(messageId));
+    if (wrapper) messagesDiv.removeChild(wrapper);
+}
+
+async function getDisplayName(username) {
+    const res = await fetch(`${API_BASE}/users/by-username/${username}`);
+    if (!res.ok) return username; // fallback на username
+    const user = await res.json();
+    return user.displayName;
 }
 
 // ---------------- Render ----------------
@@ -220,9 +280,11 @@ function subscribeToChat(chatId) {
     }
 
     chatSubscription = stompClient.subscribe(`/topic/chat.${chatId}`, async () => {
-        // просто перерисовываем все чаты и текущий чат
-        await loadChats();
-        if (currentChat) await openChat(currentChat);
+        if (!currentChat) return;
+
+        const res = await fetch(`${API_BASE}/chats/${currentChat}/messages`);
+        const messages = await res.json();
+        renderMessages(messages);
     });
 }
 

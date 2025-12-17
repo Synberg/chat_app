@@ -23,6 +23,11 @@ public class UserController {
         return userService.find(id);
     }
 
+    @GetMapping("/by-username/{username}")
+    public UserDto getUserByUsername(@PathVariable String username) {
+        return userService.findByUsername(username);
+    }
+
     @GetMapping
     public List<UserDto> getUsers() {
         return userService.findAll();

@@ -35,6 +35,12 @@ public class UserService {
                 .toList();
     }
 
+    public UserDto findByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        return mapToDto(user);
+    }
+
     public List<ChatDto> findAllChats(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
         List<Chat> chats = chatRepository.findByUser1OrUser2(user, user);

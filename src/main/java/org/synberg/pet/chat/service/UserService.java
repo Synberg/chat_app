@@ -12,8 +12,6 @@ import org.synberg.pet.chat.exception.AlreadyExistsException;
 import org.synberg.pet.chat.exception.NotFoundException;
 import org.synberg.pet.chat.repository.ChatRepository;
 import org.synberg.pet.chat.repository.UserRepository;
-
-import java.rmi.AlreadyBoundException;
 import java.util.List;
 
 @Service
